@@ -1,0 +1,10 @@
+{
+    "locale": "en-US",
+    "messages": {
+      "appmenu": {
+        "items": {
+          "PlotInfoTool": "Real Estate Information"
+        }
+      }
+    }
+  }
