@@ -48,6 +48,21 @@ Il est nécessaire de renseigner les informations suivantes dans le fichier de c
  * `pdfQueryUrl`: URL d'une instance de [consultdfrapport](https://github.com/cazitouni/consultdfrapport) pour l'impression du rapport pdf
  * `infoQueries`: Requêtes API permettant de récupérer les informations depuis la plateforme. Chaque requête comprend une clé, un message et la sous-URL de la plateforme.
 
+ Il faut également ajouter la clé suivante dans le menu de votre choix : 
+
+ ```
+{
+  "key": "PlotInfoTool",
+  "icon": "plot_info",
+  "shortcut": "ctrl+shift+x"
+}
+ ```
+
+ Et ce paramètre en haut du fichier : 
+
+ `"plotInfoService": "https://apidf-preprod.cerema.fr/ff"`
+
+
 
 **`appConfig.js` configuration:**
 
@@ -55,3 +70,12 @@ Il est également nécessaire de modifier le fichier `appConfig.js` de votre ins
 La ligne suivante doit être ajoutée dans la section `PluginsDef` du fichier :
 
 `PlotInfoToolPlugin: PlotInfoTool`
+
+Ainsi que la ligne suivante dans les imports :
+
+`import PlotInfoTool from "qwc2/plugins/PlotInfoTool";`
+
+
+**Copie des fichiers:**
+
+Il convient en dernier lieu de copier les dossier `qwc2` et `static` dans votre dossier `qwc2-demo-app` en prenant le soin de fusionner ces derniers
