@@ -62,6 +62,7 @@ Il est nécessaire de renseigner les informations suivantes dans le fichier de c
 
  `"plotInfoService": "https://apidf-preprod.cerema.fr/ff"`
 
+ Il convient également d'activer le paramètre `loadTranslationOverrides`en lui  donnant la valeur `true`
 
 
 **`appConfig.js` configuration:**
