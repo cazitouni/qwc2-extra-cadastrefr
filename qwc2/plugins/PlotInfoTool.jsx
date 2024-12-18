@@ -18,7 +18,7 @@ import {clearSearch} from 'qwc2/actions/search';
 import {setCurrentTask} from 'qwc2/actions/task';
 import {LayerRole, addThemeSublayer, addLayerFeatures, removeLayer} from 'qwc2/actions/layers';
 import ResizeableWindow from 'qwc2/components/ResizeableWindow';
-import Spinner from 'qwc2/components/Spinner';
+import Spinner from 'qwc2/components/widgets/Spinner';
 import Icon from 'qwc2/components/Icon';
 import {zoomToPoint} from 'qwc2/actions/map';
 import {UrlParams} from 'qwc2/utils/PermaLinkUtils';
@@ -471,6 +471,26 @@ class PlotInfoTool extends React.Component {
             // eslint-disable-next-line
             alert(errorMsg || "Print failed");
         });
+    };
+    toggleEgridInfo = (infoEntry, queryUrl, params) => {
+        if (this.state.expandedInfo === infoEntry.key) {
+            this.setState({ expandedInfo: null, expandedInfoData: null });
+        } else {
+            this.props.logAction("PLOTINFO_QUERY", { info: infoEntry.key });
+            this.setState({ expandedInfo: infoEntry.key, expandedInfoData: null });
+            if (infoEntry.key === 'locaux') {
+                delete params.idprocpte;
+            }
+            const headers = {
+                'Content-Type': 'application/json',
+                'Authorization': `token ${this.props.token}`
+            };
+            axios.get(queryUrl, { params, headers }).then(response => {
+                this.setState({ expandedInfoData: response.data || { failed: infoEntry.failMsgId || true } });
+            }).catch(() => {
+                this.setState({ expandedInfoData: { failed: infoEntry.failMsgId || true } });
+            });
+        }
     };
 }
 
