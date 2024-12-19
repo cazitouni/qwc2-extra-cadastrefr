@@ -462,8 +462,12 @@ class PlotInfoTool extends React.Component {
             .then(response => {
                 const contentType = response.headers["content-type"];
                 let filename = infoEntry.id + '.pdf';
-                const contentDisposition = response.headers["content-disposition"];
-                filename = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(contentDisposition)[1];
+                try {
+                    const contentDisposition = response.headers["content-disposition"];
+                    filename = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(contentDisposition)[1];
+                } catch (e) {
+                    /* Pass */
+                }
                 FileSaver.saveAs(new Blob([response.data], {type: contentType}), filename);
                 this.setState((state) => ({pendingPdfs: state.pendingPdfs.filter(entry => entry !== infoEntry.id)}));
             })
