@@ -39,12 +39,14 @@ class PlotInfoTool extends React.Component {
         infoQueries: PropTypes.array,
         logAction: PropTypes.func,
         map: PropTypes.object,
+        pdfQueryUrl: PropTypes.string,
         removeLayer: PropTypes.func,
         selection: PropTypes.object,
         setCurrentTask: PropTypes.func,
         theme: PropTypes.object,
         themeLayerRestorer: PropTypes.func,
         toolLayers: PropTypes.array,
+        token: PropTypes.string,
         windowSize: PropTypes.object,
         zoomToPoint: PropTypes.func
     };
@@ -188,7 +190,7 @@ class PlotInfoTool extends React.Component {
                                     <td><div>{(plot.properties.ccoriv ?? '')}</div></td>
                                 </tr>
                                 <tr key='date-acte'>
-                                    <td>Date de l'acte</td>
+                                    <td>Date de l&apos;acte</td>
                                     <td><div>{(plot.properties.jdatat.replace(/(\d{2})(\d{2})(\d{4})/, '$1/$2/$3') ?? '')}</div></td>
                                 </tr>
                                 <tr key='contenance'>
@@ -416,11 +418,11 @@ class PlotInfoTool extends React.Component {
             axios.get(queryUrl, { params, headers })
                 .then(response => {
                     this.setState({
-                        expandedSubInfoData: response.data || { failed: infoEntry.failMsgId || true }
+                        expandedSubInfoData: response.data || { failed: true }
                     });
                 })
                 .catch(() => {
-                    this.setState({ expandedSubInfoData: { failed: infoEntry.failMsgId || true } });
+                    this.setState({ expandedSubInfoData: { failed: true } });
                 });
         });
     };
@@ -450,27 +452,27 @@ class PlotInfoTool extends React.Component {
         this.props.logAction("PLOTINFO_PDF_QUERY", {info: infoEntry.id});
         ev.stopPropagation();
         this.setState((state) => ({pendingPdfs: [...state.pendingPdfs, infoEntry.id]}));
-        const params = {
-            parcelle: infoEntry.id,
-            token: this.props.token
+        const headers = {
+            Authorization: `Bearer ${this.props.token}`
         };
-        axios.get(this.props.pdfQueryUrl, {params, responseType: 'blob', validateStatus: status => status >= 200 && status < 300 && status !== 204}).then(response => {
-            const contentType = response.headers["content-type"];
-            let filename = infoEntry.id + '.pdf';
-            try {
+        const params = {
+            parcelle: infoEntry.id
+        };
+        axios.get(this.props.pdfQueryUrl, {params, headers, responseType: 'blob', validateStatus: status => status >= 200 && status < 300 && status !== 204})
+            .then(response => {
+                const contentType = response.headers["content-type"];
+                let filename = infoEntry.id + '.pdf';
                 const contentDisposition = response.headers["content-disposition"];
                 filename = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(contentDisposition)[1];
-            } catch (e) {
-                /* Pass */
-            }
-            FileSaver.saveAs(new Blob([response.data], {type: contentType}), filename);
-            this.setState((state) => ({pendingPdfs: state.pendingPdfs.filter(entry => entry !== infoEntry.id)}));
-        }).catch(() => {
-            this.setState((state) => ({pendingPdfs: state.pendingPdfs.filter(entry => entry !== infoEntry.id)}));
-            const errorMsg = infoEntry.failMsgId ? LocaleUtils.tr(infoEntry.failMsgId) : "";
-            // eslint-disable-next-line
-            alert(errorMsg || "Print failed");
-        });
+                FileSaver.saveAs(new Blob([response.data], {type: contentType}), filename);
+                this.setState((state) => ({pendingPdfs: state.pendingPdfs.filter(entry => entry !== infoEntry.id)}));
+            })
+            .catch(() => {
+                this.setState((state) => ({pendingPdfs: state.pendingPdfs.filter(entry => entry !== infoEntry.id)}));
+                const errorMsg = infoEntry.failMsgId ? LocaleUtils.tr(infoEntry.failMsgId) : "";
+                 
+                alert(errorMsg || "Print failed");
+            });
     };
     toggleEgridInfo = (infoEntry, queryUrl, params) => {
         if (this.state.expandedInfo === infoEntry.key) {
